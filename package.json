@@ -1,7 +1,7 @@
 {
   "name": "graphql-http-ws-client",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "dependencies": {
     "apollo-client": "^2.6.4",
     "apollo-link-error": "^1.1.12",
@@ -15,6 +15,7 @@
     "subscriptions-transport-ws": "^0.9.16"
   },
   "devDependencies": {
+    "apollo-cache-persist": "^0.1.1",
     "node-fetch": "^2.6.0",
     "ws": "^7.1.2"
   },
