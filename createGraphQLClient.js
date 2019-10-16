@@ -20,7 +20,7 @@ export default (graphQLURL, passedOptions = {}) => {
 	let httpLink = null;
 	if(options.createHTTPLink) {
 		if(typeof options.fetch !== 'function' && (typeof window !== 'object' || typeof window.fetch !== 'function'))
-			throw new Error(`Missing fetch implementation on windows.fetch or options.fetch`);
+			throw new Error(`Missing fetch implementation on window.fetch or options.fetch`);
 		const fetchImplementation = (typeof options.fetch === 'function') ? options.fetch : window.fetch;
 		httpLink = new HttpLink({ uri: graphQLURL, fetch: fetchImplementation });
 	}
@@ -28,8 +28,8 @@ export default (graphQLURL, passedOptions = {}) => {
 	let websocketLink = null;
 	let subscriptionClient = null;
 	if(options.createWebsocketLink) {
-		if(typeof options.websocket !== 'function' && (typeof window !== 'object' || typeof window.websocket !== 'function'))
-			throw new Error(`Missing websocket implementation on windows.WebSocket or options.websocket`);
+		if(typeof options.websocket !== 'function' && (typeof window !== 'object' || typeof window.WebSocket !== 'function'))
+			throw new Error(`Missing websocket implementation on window.WebSocket or options.websocket`);
 
 		const websocketImplementation = (typeof options.websocket === 'function') ? options.websocket : window.WebSocket;
 		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), {
@@ -41,11 +41,11 @@ export default (graphQLURL, passedOptions = {}) => {
 	let transportLink = null;
 	if(httpLink !== null && websocketLink !== null) { // httpLink and websocketLink exist
 		transportLink = split(({ query }) => {
-			const { kind, operation } = getMainDefinition(query);
-			return kind === 'OperationDefinition' && operation === 'subscription';
-		},
-		websocketLink,
-		httpLink);
+				const { kind, operation } = getMainDefinition(query);
+				return kind === 'OperationDefinition' && operation === 'subscription';
+			},
+			websocketLink,
+			httpLink);
 	}
 	else if(websocketLink !== null) // only websocketLink exists
 		transportLink = websocketLink;
