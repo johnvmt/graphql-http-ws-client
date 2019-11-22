@@ -60,23 +60,7 @@ export default (graphQLURL, passedOptions = {}) => {
 
 	const link = concat(retryLink, transportLink);
 
-	const defaultApolloOptions = (typeof options.defaultApolloOptions === 'object' && options.defaultApolloOptions !== null) ? options.apolloOptions : {
-		watchQuery: {
-			fetchPolicy: 'no-cache',
-			errorPolicy: 'ignore',
-		},
-		query: {
-			fetchPolicy: 'no-cache',
-			errorPolicy: 'all',
-		},
-		mutate: {
-			fetchPolicy: 'no-cache',
-			errorPolicy: 'all'
-		},
-		subscribe: {
-			fetchPolicy: 'no-cache'
-		}
-	};
+	const defaultApolloOptions = (typeof options.defaultApolloOptions === 'object' && options.defaultApolloOptions !== null) ? options.defaultApolloOptions : {};
 
 	const cache = (typeof options.cache === 'object' && options.cache !== null) ? options.cache : new InMemoryCache();
 

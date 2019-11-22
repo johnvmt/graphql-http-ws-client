@@ -1,7 +1,15 @@
 {
   "name": "graphql-http-ws-client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
+  "author": {
+    "name": "John Murphy-Teixidor",
+    "email": "johnvmt@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnvmt/graphql-http-ws-client"
+  },
   "dependencies": {
     "apollo-cache-inmemory": "^1.6.3",
     "apollo-client": "^2.6.4",
