@@ -5,7 +5,7 @@ import { WebSocketLink } from "apollo-link-ws";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import { RetryLink } from "apollo-link-retry";
 import { getMainDefinition } from "apollo-utilities";
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache } from "apollo-cache-inmemory";
 
 export default (graphQLURL, passedOptions = {}) => {
 	const httpURLToWS = (url) => {
@@ -14,7 +14,8 @@ export default (graphQLURL, passedOptions = {}) => {
 
 	const options = Object.assign({
 		createHTTPLink: true,
-		createWebsocketLink: true
+		createWebsocketLink: true,
+		resolvers: {}
 	}, passedOptions);
 
 	let httpLink = null;
@@ -67,7 +68,8 @@ export default (graphQLURL, passedOptions = {}) => {
 	const client = new ApolloClient({
 		cache: cache,
 		link: link,
-		defaultOptions: defaultApolloOptions
+		defaultOptions: defaultApolloOptions,
+		resolvers: options.resolvers
 	});
 
 	return {
