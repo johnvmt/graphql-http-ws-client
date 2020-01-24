@@ -32,9 +32,14 @@ export default (graphQLURL, passedOptions) => {
 			throw new Error(`Missing websocket implementation on window.WebSocket or options.websocket`);
 
 		const websocketImplementation = (typeof options.websocket === 'function') ? options.websocket : window.WebSocket;
-		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), {
-			reconnect: true,
-		}, websocketImplementation);
+
+		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), Object.assign(
+			{
+				reconnect: true
+			},
+			filterObject(options, ['reconnect', 'timeout', 'lazy', 'reconnect', 'reconnectionAttempts', 'connectionCallback', 'inactivityTimeout', 'connectionParams'])
+		), websocketImplementation);
+
 		websocketLink = new WebSocketLink(subscriptionClient);
 	}
 
@@ -67,5 +72,14 @@ export default (graphQLURL, passedOptions) => {
 		transportLink: transportLink,
 		retryLink: retryLink,
 		subscriptionClient: subscriptionClient
+	};
+
+	function filterObject(rawObject, filterKeys) {
+		return Object.keys(rawObject)
+			.filter(key => filterKeys.includes(key))
+			.reduce((filteredObject, key) => {
+				filteredObject[key] = rawObject[key];
+				return filteredObject;
+			}, {});
 	}
 }
