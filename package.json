@@ -1,6 +1,6 @@
 {
   "name": "graphql-http-ws-client",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "author": {
     "name": "John Murphy-Teixidor",
@@ -11,23 +11,16 @@
     "url": "https://github.com/johnvmt/graphql-http-ws-client"
   },
   "dependencies": {
-    "apollo-cache-inmemory": "^1.6.3",
-    "apollo-client": "^2.6.4",
-    "apollo-link-error": "^1.1.12",
-    "apollo-link-http": "^1.5.16",
-    "apollo-link-retry": "^2.2.15",
-    "apollo-link-ws": "^1.0.19",
-    "apollo-utilities": "^1.3.2",
-    "esm": "^3.2.25",
-    "graphql": "^14.5.8",
-    "graphql-tag": "^2.10.1",
-    "subscriptions-transport-ws": "^0.9.16"
+    "@apollo/client": "^3.1.3",
+    "graphql": "15.3.0",
+    "subscriptions-transport-ws": "^0.9.17"
   },
   "devDependencies": {
+    "esm": "^3.2.25",
     "apollo-cache-persist": "^0.1.1",
     "node-fetch": "^2.6.0",
     "ws": "^7.1.2"
   },
-  "main": "createGraphQLClient.js",
-  "module": "createGraphQLClient.js"
+  "main": "./index.js",
+  "module": "./index.js"
 }

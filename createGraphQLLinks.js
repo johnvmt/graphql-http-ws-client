@@ -1,17 +1,18 @@
-import {concat, split} from "apollo-link";
-import {getMainDefinition} from "apollo-utilities";
-import { HttpLink } from "apollo-link-http";
-import { WebSocketLink } from "apollo-link-ws";
+import { concat, split } from '@apollo/client/core';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { RetryLink } from "@apollo/client/link/retry";
+import { HttpLink } from "@apollo/client/link/http";
+import { WebSocketLink } from "@apollo/client/link/ws";
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import { RetryLink } from "apollo-link-retry";
 
 // TODO allow override of fetch options as in https://www.apollographql.com/docs/link/links/http/
 
 export default (graphQLURL, passedOptions) => {
-	const options = Object.assign({
+	const options = {
 		createHTTPLink: true,
-		createWebsocketLink: true
-	}, passedOptions);
+		createWebsocketLink: true,
+		...passedOptions
+	};
 
 	const httpURLToWS = (url) => {
 		return url.replace(/(http)(s)?:\/\//, "ws$2://");
@@ -19,41 +20,46 @@ export default (graphQLURL, passedOptions) => {
 
 	let httpLink = null;
 	if(options.createHTTPLink) {
-		if(typeof options.fetch !== 'function' && (typeof window !== 'object' || typeof window.fetch !== 'function'))
-			throw new Error(`Missing fetch implementation on window.fetch or options.fetch`);
-		const fetchImplementation = (typeof options.fetch === 'function') ? options.fetch : window.fetch;
-		httpLink = new HttpLink({ uri: graphQLURL, fetch: fetchImplementation });
+		const httpLinkOptions = {
+			uri: graphQLURL,
+		...options.httpLinkOptions
+		};
+
+		if(typeof httpLinkOptions.fetch !== 'function' && (typeof window !== 'object' || typeof window.fetch !== 'function'))
+			throw new Error(`Missing fetch implementation on window.fetch or options.httpLinkOptions.fetch`);
+
+		httpLink = new HttpLink(httpLinkOptions);
 	}
 
-	let websocketLink = null;
+	let wsLink = null;
 	let subscriptionClient = null;
-	if(options.createWebsocketLink) {
-		if(typeof options.websocket !== 'function' && (typeof window !== 'object' || typeof window.WebSocket !== 'function'))
+	if(options.createWSLink) {
+		const wsLinkOptions = {
+			reconnect: true,
+			...options.wsLinkOptions
+		};
+
+		if(typeof options.ws !== 'function' && (typeof window !== 'object' || typeof window.WebSocket !== 'function'))
 			throw new Error(`Missing websocket implementation on window.WebSocket or options.websocket`);
 
-		const websocketImplementation = (typeof options.websocket === 'function') ? options.websocket : window.WebSocket;
+		const websocketImplementation = (typeof options.ws === 'function') ? options.ws : window.WebSocket;
 
-		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), Object.assign(
-			{
-				reconnect: true
-			},
-			filterObject(options, ['reconnect', 'timeout', 'lazy', 'reconnect', 'reconnectionAttempts', 'connectionCallback', 'inactivityTimeout', 'connectionParams'])
-		), websocketImplementation);
+		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), wsLinkOptions, websocketImplementation);
 
-		websocketLink = new WebSocketLink(subscriptionClient);
+		wsLink = new WebSocketLink(subscriptionClient);
 	}
 
 	let transportLink = null;
-	if(httpLink !== null && websocketLink !== null) { // httpLink and websocketLink exist
+	if(httpLink !== null && wsLink !== null) { // httpLink and websocketLink exist
 		transportLink = split(({ query }) => {
 				const { kind, operation } = getMainDefinition(query);
 				return kind === 'OperationDefinition' && operation === 'subscription';
 			},
-			websocketLink,
+			wsLink,
 			httpLink);
 	}
-	else if(websocketLink !== null) // only websocketLink exists
-		transportLink = websocketLink;
+	else if(wsLink !== null) // only websocketLink exists
+		transportLink = wsLink;
 	else if(httpLink !== null) // only httpLink (no Subscriptions)
 		transportLink = httpLink;
 
@@ -68,18 +74,9 @@ export default (graphQLURL, passedOptions) => {
 	return {
 		link: options.hasOwnProperty('middleware') ? concat(options.middleware, link) : link,
 		httpLink: httpLink,
-		websocketLink: websocketLink,
+		wsLink: wsLink,
 		transportLink: transportLink,
 		retryLink: retryLink,
 		subscriptionClient: subscriptionClient
 	};
-
-	function filterObject(rawObject, filterKeys) {
-		return Object.keys(rawObject)
-			.filter(key => filterKeys.includes(key))
-			.reduce((filteredObject, key) => {
-				filteredObject[key] = rawObject[key];
-				return filteredObject;
-			}, {});
-	}
 }

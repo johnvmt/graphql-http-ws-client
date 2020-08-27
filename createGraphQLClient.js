@@ -1,12 +1,12 @@
-import { ApolloClient } from "apollo-client";
-import { getMainDefinition } from "apollo-utilities";
-import { InMemoryCache } from "apollo-cache-inmemory";
+import { ApolloClient } from "@apollo/client/core";
+import { InMemoryCache } from "@apollo/client/cache";
 import createGraphQLLinks from "./createGraphQLLinks";
 
 export default (graphQLURL, passedOptions = {}) => {
-	const options = Object.assign({
-		resolvers: {}
-	}, passedOptions);
+	const options = {
+		resolvers: {},
+		...passedOptions
+	};
 
 	const links = createGraphQLLinks(graphQLURL, options);
 
@@ -21,8 +21,11 @@ export default (graphQLURL, passedOptions = {}) => {
 		resolvers: options.resolvers
 	});
 
-	return Object.assign(links, {
+	return {
+		...links,
 		client: client,
 		cache: cache
-	});
-}
+	};
+};
+
+

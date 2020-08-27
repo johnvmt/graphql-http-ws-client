@@ -2,31 +2,32 @@
 
 ### Node.js with HTTP and WS links
 
-	import createGraphQLClient from "graphql-http-ws-client";
-	import gql from "graphql-tag";
+	import {createGraphQLClient, gql} from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
 		websocket: WebSocket,
-		fetch: fetch
+		httpLinkOptions: {
+            fetch: fetch
+        }
 	});
 
 ### Node.js with HTTP link only (no Subscriptions)
 
-	import createGraphQLClient from "graphql-http-ws-client";
-	import gql from "graphql-tag";
+	import {createGraphQLClient, gql} from "graphql-http-ws-client";
 	import fetch from "node-fetch";
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
-		fetch: fetch,
-		createWebsocketLink: false
+		httpLinkOptions: {
+		    fetch: fetch
+		},
+		createWSLink: false
 	});
 
 ### Node.js with WS link only
 
-	import createGraphQLClient from "graphql-http-ws-client";
-	import gql from "graphql-tag";
+	import {createGraphQLClient, gql} from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
 	
@@ -39,10 +40,8 @@
 
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
-	import createGraphQLClient from "graphql-http-ws-client";
-	import gql from "graphql-tag";    
+	import {createGraphQLClient, gql} from "graphql-http-ws-client";
 	import { persistCache } from "apollo-cache-persist";
-	
 	const { client, cache } = createGraphQLClient("MY_GRAPHQL_URL");
 	
 	const waitOnCache = persistCache({
@@ -60,4 +59,39 @@
 			document.getElementById('root')
 		)
 	});
-	
+
+### Simple Queries
+
+Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
+
+    client.query({
+        query: gql(`query {
+            hello
+        }`)
+    }).then(({data}) => {
+        console.log("DATA", data);
+    });
+
+### Simple Subscriptions
+
+Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
+
+    client.subscribe({
+        query: gql(`subscription {
+            time
+        }`)
+    }).subscribe({
+        next({data}) {
+            console.log(data);
+        }
+    });
+    
+### Changes
+
+#### v0.2.0
+
+- Module now exports gql and all exports from @apollo/client/core
+- Renamed createWebsocketLink to createWSLink and websocket option to ws for consistency with options
+- New httpLinkOptions and wsLinkOptions parameters
+    - fetch option moves to httpLinkOptions option
+    - all ws link options move to wsLinkOptions option
