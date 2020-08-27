@@ -10,7 +10,7 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 export default (graphQLURL, passedOptions) => {
 	const options = {
 		createHTTPLink: true,
-		createWebsocketLink: true,
+		createWSLink: true,
 		...passedOptions
 	};
 
