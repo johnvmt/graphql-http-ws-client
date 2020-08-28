@@ -88,8 +88,8 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     
 ### Changes
 
-#### v0.2.0
-
+#### v0.2
+- Module now requires graphql and subscriptions-transport-ws as peer dependencies
 - Module now exports gql and all exports from @apollo/client/core
 - Renamed createWebsocketLink to createWSLink and websocket option to ws for consistency with options
 - New httpLinkOptions and wsLinkOptions parameters
