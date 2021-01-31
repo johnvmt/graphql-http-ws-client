@@ -1,6 +1,6 @@
-import { ApolloClient } from "@apollo/client/core";
-import { InMemoryCache } from "@apollo/client/cache";
-import createGraphQLLinks from "./createGraphQLLinks";
+import {ApolloClient} from "@apollo/client/core/core.cjs.js";
+import {InMemoryCache} from "@apollo/client/cache/cache.cjs.js"
+import createGraphQLLinks from "./createGraphQLLinks.js";
 
 export default (graphQLURL, passedOptions = {}) => {
 	const options = {

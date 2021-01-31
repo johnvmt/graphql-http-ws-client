@@ -1,7 +1,8 @@
 {
   "name": "graphql-http-ws-client",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "private": false,
+  "license": "MIT",
   "author": {
     "name": "John Murphy-Teixidor",
     "email": "johnvmt@gmail.com"
@@ -10,19 +11,30 @@
     "type": "git",
     "url": "https://github.com/johnvmt/graphql-http-ws-client"
   },
+  "scripts": {
+    "build": "npx babel --plugins @babel/plugin-transform-modules-commonjs --out-dir cjs src"
+  },
   "dependencies": {
-    "@apollo/client": "^3.1.3"
+    "@apollo/client": "^3.3.7"
   },
   "devDependencies": {
-    "esm": "^3.2.25",
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/preset-env": "^7.12.11",
     "apollo-cache-persist": "^0.1.1",
-    "node-fetch": "^2.6.0",
-    "ws": "^7.1.2"
+    "cross-fetch": "^3.0.6",
+    "graphql": "^15.5.0",
+    "subscriptions-transport-ws": "^0.9.18",
+    "ws": "^7.4.2"
   },
   "peerDependencies": {
     "graphql": "^14.0.0 || ^15.0.0",
     "subscriptions-transport-ws": "^0.9.0"
   },
-  "main": "./index.js",
-  "module": "./index.js"
+  "exports": {
+    "require": "./cjs/index.js",
+    "import": "./src/index.js"
+  }
 }
+

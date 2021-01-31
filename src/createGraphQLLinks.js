@@ -1,8 +1,8 @@
-import { concat, split } from '@apollo/client/core';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { RetryLink } from "@apollo/client/link/retry";
-import { HttpLink } from "@apollo/client/link/http";
-import { WebSocketLink } from "@apollo/client/link/ws";
+import {concat, split} from '@apollo/client/link/core/core.cjs.js';
+import {WebSocketLink} from "@apollo/client/link/ws/ws.cjs.js";
+import {HttpLink} from "@apollo/client/link/http/http.cjs.js";
+import {RetryLink} from "@apollo/client/link/retry/retry.cjs.js";
+import {getMainDefinition} from "@apollo/client/utilities/utilities.cjs.js"
 import { SubscriptionClient } from "subscriptions-transport-ws";
 
 // TODO allow override of fetch options as in https://www.apollographql.com/docs/link/links/http/
@@ -45,7 +45,7 @@ export default (graphQLURL, passedOptions) => {
 		const websocketImplementation = (typeof options.ws === 'function') ? options.ws : window.WebSocket;
 
 		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), wsLinkOptions, websocketImplementation);
-
+		
 		wsLink = new WebSocketLink(subscriptionClient);
 	}
 
