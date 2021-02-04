@@ -65,9 +65,9 @@
 Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
 
     client.query({
-        query: gql(`query {
+        query: `query {
             hello
-        }`)
+        }`
     }).then(({data}) => {
         console.log("DATA", data);
     });
@@ -77,9 +77,9 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
 Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
 
     client.subscribe({
-        query: gql(`subscription {
+        query: `subscription {
             time
-        }`)
+        }`
     }).subscribe({
         next({data}) {
             console.log(data);
@@ -87,6 +87,14 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     });
     
 ### Changes
+
+#### v1.1
+
+- Passed-in queries and mutations are now automatically wrapped with gql() tag, if they are not already wrapped
+
+#### v1.0
+
+- Bundles CJS and ESM versions of module
 
 #### v0.2
 - Module now requires graphql and subscriptions-transport-ws as peer dependencies

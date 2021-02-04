@@ -1,5 +1,5 @@
-import {ApolloClient} from "@apollo/client/core/core.cjs.js";
-import {InMemoryCache} from "@apollo/client/cache/cache.cjs.js"
+import ApolloClientWithGQL from "./ApolloClientWithGQL.js";
+import {InMemoryCache} from "@apollo/client/cache/cache.cjs.js";
 import createGraphQLLinks from "./createGraphQLLinks.js";
 
 export default (graphQLURL, passedOptions = {}) => {
@@ -14,7 +14,7 @@ export default (graphQLURL, passedOptions = {}) => {
 
 	const cache = (typeof options.cache === 'object' && options.cache !== null) ? options.cache : new InMemoryCache();
 
-	const client = new ApolloClient({
+	const client = new ApolloClientWithGQL({
 		cache: cache,
 		link: links.link,
 		defaultOptions: defaultApolloOptions,

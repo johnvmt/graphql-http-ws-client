@@ -19,6 +19,7 @@ export default (graphQLURL, passedOptions) => {
 	};
 
 	let httpLink = null;
+	
 	if(options.createHTTPLink) {
 		const httpLinkOptions = {
 			uri: graphQLURL,

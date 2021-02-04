@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _coreCjs = require("@apollo/client/core/core.cjs.js");
+var _ApolloClientWithGQL = _interopRequireDefault(require("./ApolloClientWithGQL.js"));
 
 var _cacheCjs = require("@apollo/client/cache/cache.cjs.js");
 
@@ -21,7 +21,7 @@ var _default = (graphQLURL, passedOptions = {}) => {
   const links = (0, _createGraphQLLinks.default)(graphQLURL, options);
   const defaultApolloOptions = typeof options.defaultApolloOptions === 'object' && options.defaultApolloOptions !== null ? options.defaultApolloOptions : {};
   const cache = typeof options.cache === 'object' && options.cache !== null ? options.cache : new _cacheCjs.InMemoryCache();
-  const client = new _coreCjs.ApolloClient({
+  const client = new _ApolloClientWithGQL.default({
     cache: cache,
     link: links.link,
     defaultOptions: defaultApolloOptions,
