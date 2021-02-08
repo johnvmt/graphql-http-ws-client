@@ -1,6 +1,6 @@
 {
   "name": "graphql-http-ws-client",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": false,
   "author": {
     "name": "John Murphy-Teixidor",
@@ -20,6 +20,7 @@
     "ws": "^7.1.2"
   },
   "peerDependencies": {
+    "graphql-tag": "^2.11.0",
     "graphql": "^14.0.0 || ^15.0.0",
     "subscriptions-transport-ws": "^0.9.0"
   },

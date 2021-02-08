@@ -88,6 +88,10 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     
 ### Changes
 
+### v0.3
+
+- Queries and mutations can now be passed as strings instead of being wrapped in the `gql` tag
+
 #### v0.2
 - Module now requires graphql and subscriptions-transport-ws as peer dependencies
 - Module now exports gql and all exports from @apollo/client/core
