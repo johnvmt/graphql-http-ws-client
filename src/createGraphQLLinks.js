@@ -1,8 +1,8 @@
-import { concat, split } from '@apollo/client/core';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { RetryLink } from "@apollo/client/link/retry";
-import { HttpLink } from "@apollo/client/link/http";
-import { WebSocketLink } from "@apollo/client/link/ws";
+import { getMainDefinition } from "@apollo/client/utilities/utilities.cjs.js";
+import { concat, split } from "@apollo/client/link/core/core.cjs.js";
+import { RetryLink } from "@apollo/client/link/retry/retry.cjs.js";
+import { HttpLink } from "@apollo/client/link/http/http.cjs.js";
+import { WebSocketLink } from "@apollo/client/link/ws/ws.cjs.js";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 
 // TODO allow override of fetch options as in https://www.apollographql.com/docs/link/links/http/
@@ -22,7 +22,7 @@ export default (graphQLURL, passedOptions) => {
 	if(options.createHTTPLink) {
 		const httpLinkOptions = {
 			uri: graphQLURL,
-		...options.httpLinkOptions
+			...options.httpLinkOptions
 		};
 
 		if(typeof httpLinkOptions.fetch !== 'function' && (typeof window !== 'object' || typeof window.fetch !== 'function'))
@@ -39,10 +39,10 @@ export default (graphQLURL, passedOptions) => {
 			...options.wsLinkOptions
 		};
 
-		if(typeof options.ws !== 'function' && (typeof window !== 'object' || typeof window.WebSocket !== 'function'))
+		if(typeof options.websocket !== 'function' && (typeof window !== 'object' || typeof window.WebSocket !== 'function'))
 			throw new Error(`Missing websocket implementation on window.WebSocket or options.websocket`);
 
-		const websocketImplementation = (typeof options.ws === 'function') ? options.ws : window.WebSocket;
+		const websocketImplementation = (typeof options.websocket === 'function') ? options.websocket : window.WebSocket;
 
 		subscriptionClient = new SubscriptionClient(httpURLToWS(graphQLURL), wsLinkOptions, websocketImplementation);
 
@@ -50,7 +50,7 @@ export default (graphQLURL, passedOptions) => {
 	}
 
 	let transportLink = null;
-	if(httpLink !== null && wsLink !== null) { // httpLink and websocketLink exist
+	if(httpLink !== null && wsLink !== null) { // httpLink and wsLink exist
 		transportLink = split(({ query }) => {
 				const { kind, operation } = getMainDefinition(query);
 				return kind === 'OperationDefinition' && operation === 'subscription';

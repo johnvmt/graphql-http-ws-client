@@ -2,7 +2,7 @@
 
 ### Node.js with HTTP and WS links
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
 	
@@ -15,7 +15,7 @@
 
 ### Node.js with HTTP link only (no Subscriptions)
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import fetch from "node-fetch";
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
@@ -27,7 +27,7 @@
 
 ### Node.js with WS link only
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
 	
@@ -65,9 +65,9 @@
 Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
 
     client.query({
-        query: gql(`query {
+        query: `query {
             hello
-        }`)
+        }`
     }).then(({data}) => {
         console.log("DATA", data);
     });
@@ -77,9 +77,9 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
 Using the [server example from graphql-http-ws-server](https://github.com/johnvmt/graphql-http-ws-server#readme)
 
     client.subscribe({
-        query: gql(`subscription {
+        query: `subscription {
             time
-        }`)
+        }`
     }).subscribe({
         next({data}) {
             console.log(data);
@@ -88,7 +88,12 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     
 ### Changes
 
-### v0.3
+#### v2.0
+
+- Changed package type to module
+- Passed-in queries and mutations are now automatically wrapped with gql() tag, if they are not already wrapped
+
+#### v0.3
 
 - Queries and mutations can now be passed as strings instead of being wrapped in the `gql` tag
 
