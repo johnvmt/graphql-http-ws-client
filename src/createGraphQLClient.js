@@ -1,4 +1,4 @@
-import { InMemoryCache } from "@apollo/client/cache/cache.cjs.js";
+import { InMemoryCache } from "@apollo/client/cache/cache.cjs";
 import ApolloClientWithGQL from "./ApolloClientWithGQL.js";
 import createGraphQLLinks from "./createGraphQLLinks.js";
 

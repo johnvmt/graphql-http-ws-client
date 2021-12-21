@@ -1,4 +1,4 @@
-import { ApolloClient } from "@apollo/client/core/core.cjs.js";
+import { ApolloClient } from "@apollo/client/core/core.cjs";
 import gql from "graphql-tag";
 
 class ApolloClientWithGQL extends ApolloClient {
