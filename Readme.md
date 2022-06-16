@@ -1,21 +1,35 @@
 ## GraphQL client over HTTP/WS
 
-### Node.js with HTTP and WS links
+### Node.js with HTTP and WS links, and context
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
+
+    let addContext = async () => {
+		return {
+			headers: {
+				Authorization: `Bearer MYAUTHTOKEN`
+			}
+		}
+    };
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
-		websocket: WebSocket,
-		httpLinkOptions: {
-            fetch: fetch
+		createWSLink: true,
+        createHTTPLink: true,
+        websocket: WebSocket,
+        httpLinkOptions: {
+            fetch: fetch,
+            setContext: addContext
+        },
+        wsLinkOptions: {
+            connectionParams: addContext
         }
 	});
 
 ### Node.js with HTTP link only (no Subscriptions)
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import fetch from "node-fetch";
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
@@ -27,12 +41,36 @@
 
 ### Node.js with WS link only
 
-	import {createGraphQLClient, gql} from "graphql-http-ws-client";
+	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
 		websocket: WebSocket,
+		createHTTPLink: false
+	});
+
+### Node.js with WS link and [graphql-transport-ws subprotocol](https://github.com/enisdenjo/graphql-ws/issues/154)
+
+	import { createGraphQLClient } from "graphql-http-ws-client";
+	import WebSocket from "ws";
+	import fetch from "node-fetch";
+	
+	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
+		websocket: WebSocket,
+        wsSubprotocol: "graphql-transport-ws",
+		createHTTPLink: false
+	});
+
+### Node.js with WS link and [graphql-ws subprotocol](https://github.com/enisdenjo/graphql-ws/issues/154) (default)
+
+	import { createGraphQLClient } from "graphql-ws";
+	import WebSocket from "ws";
+	import fetch from "node-fetch";
+	
+	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
+		websocket: WebSocket,
+        wsSubprotocol: "graphql-ws",
 		createHTTPLink: false
 	});
 	
@@ -88,13 +126,14 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     
 ### Changes
 
-#### v1.1
+#### v2.0
 
+- Changed package type to module
 - Passed-in queries and mutations are now automatically wrapped with gql() tag, if they are not already wrapped
 
-#### v1.0
+#### v0.3
 
-- Bundles CJS and ESM versions of module
+- Queries and mutations can now be passed as strings instead of being wrapped in the `gql` tag
 
 #### v0.2
 - Module now requires graphql and subscriptions-transport-ws as peer dependencies
