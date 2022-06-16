@@ -1,15 +1,29 @@
 ## GraphQL client over HTTP/WS
 
-### Node.js with HTTP and WS links
+### Node.js with HTTP and WS links, and context
 
 	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
 	import fetch from "node-fetch";
+
+    let addContext = async () => {
+		return {
+			headers: {
+				Authorization: `Bearer MYAUTHTOKEN`
+			}
+		}
+    };
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
-		websocket: WebSocket,
-		httpLinkOptions: {
-            fetch: fetch
+		createWSLink: true,
+        createHTTPLink: true,
+        websocket: WebSocket,
+        httpLinkOptions: {
+            fetch: fetch,
+            setContext: addContext
+        },
+        wsLinkOptions: {
+            connectionParams: addContext
         }
 	});
 
@@ -33,6 +47,30 @@
 	
 	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
 		websocket: WebSocket,
+		createHTTPLink: false
+	});
+
+### Node.js with WS link and [graphql-transport-ws subprotocol](https://github.com/enisdenjo/graphql-ws/issues/154)
+
+	import { createGraphQLClient } from "graphql-http-ws-client";
+	import WebSocket from "ws";
+	import fetch from "node-fetch";
+	
+	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
+		websocket: WebSocket,
+        wsSubprotocol: "graphql-transport-ws",
+		createHTTPLink: false
+	});
+
+### Node.js with WS link and [graphql-ws subprotocol](https://github.com/enisdenjo/graphql-ws/issues/154) (default)
+
+	import { createGraphQLClient } from "graphql-ws";
+	import WebSocket from "ws";
+	import fetch from "node-fetch";
+	
+	const { client } = createGraphQLClient("MY_GRAPHQL_URL", {
+		websocket: WebSocket,
+        wsSubprotocol: "graphql-ws",
 		createHTTPLink: false
 	});
 	
