@@ -23,7 +23,6 @@ export default (graphQLURL, options) => {
 
 	let httpLink = null;
 	if(mergedOptions.createHTTPLink) {
-
 		const authLink = mergedOptions.httpLinkOptions?.setContext
 			? setContext(mergedOptions.httpLinkOptions?.setContext)
 			: undefined;
@@ -48,26 +47,16 @@ export default (graphQLURL, options) => {
 			? mergedOptions.wsSubprotocol.toLowerCase()
 			: 'graphql-ws';
 
-
 		const wsLinkOptions = {
 			reconnect: true,
 			...mergedOptions.wsLinkOptions,
 			// override connectionParams to add subprotocol header
 			connectionParams: async (...args) => { // add subprotocol
-				console.log("CP");
 				const params = mergedOptions.wsLinkOptions?.connectionParams
 					? await mergedOptions.wsLinkOptions?.connectionParams(...args)
 					: {};
 
 				// merge in subprotocol headers
-				console.log("SENDING", {
-					...params,
-					headers: {
-						"sec-websocket-protocol": wsSubprotocol,
-						...params.headers
-					}
-				});
-
 				return {
 					...params,
 					headers: {
