@@ -14,6 +14,7 @@ export default (graphQLURL, options) => {
 	const mergedOptions = {
 		createHTTPLink: true,
 		createWSLink: true,
+		createRetryLink: true,
 		...options
 	};
 
@@ -105,18 +106,23 @@ export default (graphQLURL, options) => {
 	else if(httpLink !== null) // only httpLink (no Subscriptions)
 		transportLink = httpLink;
 
-	const retryLink = new RetryLink({
-		attempts: {
-			max: Infinity
-		}
-	});
+	let retryLink;
+	if(mergedOptions.createRetryLink) {
+		retryLink = new RetryLink({
+			...mergedOptions.retryLinkOptions
+		});
+	}
 
-	const link = concat(retryLink, transportLink);
+	const links = [transportLink];
+
+	if(retryLink)
+		links.unshift(retryLink);
+
+	if(mergedOptions.middleware)
+		links.unshift(mergedOptions.middleware);
 
 	return {
-		link: options.hasOwnProperty('middleware')
-			? concat(options.middleware, link)
-			: link,
+		link: concat(...links),
 		httpLink: httpLink,
 		wsLink: wsLink,
 		transportLink: transportLink,
