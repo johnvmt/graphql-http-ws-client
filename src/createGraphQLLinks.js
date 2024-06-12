@@ -33,8 +33,8 @@ export default (graphQLURL, options) => {
 			...mergedOptions.httpLinkOptions
 		};
 
-		if(typeof httpLinkOptions.fetch !== 'function' && (typeof window !== 'object' || typeof window.fetch !== 'function'))
-			throw new Error(`Missing fetch implementation on window.fetch or options.httpLinkOptions.fetch`);
+		if(typeof httpLinkOptions.fetch !== 'function' && (typeof fetch !== 'function'))
+			throw new Error(`Missing fetch implementation from node or window.fetch or options.httpLinkOptions.fetch`);
 
 		httpLink = authLink
 			? authLink.concat(new HttpLink(httpLinkOptions)) // add auth link before http link
