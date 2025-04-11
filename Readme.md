@@ -1,6 +1,6 @@
 ## GraphQL client over HTTP/WS
 
-### Node.js with HTTP and WS links, and context
+### Node.js with HTTP and WS links, context, and [retry options](https://www.apollographql.com/docs/react/api/link/apollo-link-retry/)
 
 	import { createGraphQLClient } from "graphql-http-ws-client";
 	import WebSocket from "ws";
@@ -24,6 +24,16 @@
         },
         wsLinkOptions: {
             connectionParams: addContext
+        },
+        retryLinkOptions: {
+            delay: {
+              initial: 300,
+              max: 6000,
+              jitter: true
+            },
+            attempts: {
+              max: Infinity
+            }
         }
 	});
 
@@ -125,6 +135,15 @@ Using the [server example from graphql-http-ws-server](https://github.com/johnvm
     });
     
 ### Changes
+
+#### v3.1
+
+- Retry Link options supported
+- Default retry link config changes to [Apollo link default](https://www.apollographql.com/docs/react/api/link/apollo-link-retry/) (notably, 5 attempts instead of infinte attempts)
+
+#### v3.0
+
+- Exports ES6 and CJS versions
 
 #### v2.0
 
