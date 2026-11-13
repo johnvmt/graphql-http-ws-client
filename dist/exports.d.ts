@@ -1,66 +1,39 @@
-import { InMemoryCache } from '@apollo/client/cache/cache.cjs';
-export * from '@apollo/client/cache/cache.cjs';
-import { ApolloClient } from '@apollo/client/core/core.cjs';
-export * from '@apollo/client/core/core.cjs';
-import gql from 'graphql-tag';
-import { getMainDefinition } from '@apollo/client/utilities/utilities.cjs';
-import { split, concat } from '@apollo/client/link/core/core.cjs';
-export * from '@apollo/client/link/core/core.cjs';
-import { RetryLink } from '@apollo/client/link/retry/retry.cjs';
-import { HttpLink } from '@apollo/client/link/http/http.cjs';
-import { setContext } from '@apollo/client/link/context/context.cjs';
-import { WebSocketLink } from '@apollo/client/link/ws/ws.cjs';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions/subscriptions.cjs';
+import { ApolloClient, gql, HttpLink, ApolloLink, InMemoryCache } from '@apollo/client';
+export * from '@apollo/client';
+import { LocalState } from '@apollo/client/local-state';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { RetryLink } from '@apollo/client/link/retry';
+import { SetContextLink } from '@apollo/client/link/context';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { createClient } from 'graphql-ws';
 
+/**
+ * Wrap options[key] with gql(), if it is a string
+ * @param options
+ * @param key
+ * @returns {*}
+ */
+const parseDocumentOption = (options, key) => {
+    return (typeof options?.[key] === "string")
+        ? { ...options, [key]: gql(options[key]) }
+        : options;
+};
+
 class ApolloClientWithGQL extends ApolloClient {
-    /**
-     * Wrap query with gql(), if passed query is a string
-     * @param options
-     * @param args
-     * @returns {*|Promise<PermissionStatus>}
-     */
-    query(options, ...args) {
-        return ApolloClient.prototype.query.apply(this, [
-            {
-                ...options,
-                query: (typeof options.query === "string") ? gql(options.query) : options.query // wrap query with gql, if query is a string
-            }
-            , ...args]
-        );
-    }
+    constructor(...args) {
+        super(...args);
 
-    /**
-     * Wrap query with gql(), if passed query is a string
-     * @param options
-     * @param args
-     * @returns {*|{unsubscribe: () => void}|AsyncIterator<ExecutionResult>|Promise<AsyncIterator<ExecutionResult> | ExecutionResult>|void|(() => void)|ZenObservable.Subscription|ZenObservable.Subscription|Promise<PushSubscription>}
-     */
-    subscribe(options, ...args) {
-        return ApolloClient.prototype.subscribe.apply(this, [
-            {
-                ...options,
-                query: (typeof options.query === "string") ? gql(options.query) : options.query // wrap query with gql, if query is a string
-            }
-            , ...args]
-        );
-    }
+        // Apollo Client 4 defines some of these as instance fields, which shadow prototype methods
+        // on a subclass, so the instance's own functions are wrapped instead
+        const query = this.query;
+        const subscribe = this.subscribe;
+        const mutate = this.mutate;
 
-    /**
-     * Wrap mutation with gql(), if passed mutation is a string
-     * @param options
-     * @param args
-     * @returns {*}
-     */
-    mutate(options, ...args) {
-        return ApolloClient.prototype.mutate.apply(this, [
-            {
-                ...options,
-                mutation: (typeof options.mutation === "string") ? gql(options.mutation) : options.mutation // wrap mutation with gql, if mutation is a string
-            }
-            , ...args]
-        );
+        this.query = (options, ...rest) => query.call(this, parseDocumentOption(options, "query"), ...rest);
+        this.subscribe = (options, ...rest) => subscribe.call(this, parseDocumentOption(options, "query"), ...rest);
+        this.mutate = (options, ...rest) => mutate.call(this, parseDocumentOption(options, "mutation"), ...rest);
     }
 }
 
@@ -80,13 +53,16 @@ var createGraphQLLinks = (graphQLURL, options) => {
 
 	let httpLink = null;
 	if(mergedOptions.createHTTPLink) {
-		const authLink = mergedOptions.httpLinkOptions?.setContext
-			? setContext(mergedOptions.httpLinkOptions?.setContext)
+		const { setContext: contextSetter, ...passedHTTPLinkOptions } = mergedOptions.httpLinkOptions ?? {};
+
+		// contextSetter keeps the (operation, prevContext) order callers already pass
+		const authLink = contextSetter
+			? new SetContextLink((prevContext, operation) => contextSetter(operation, prevContext))
 			: undefined;
 
 		const httpLinkOptions = {
 			uri: graphQLURL,
-			...mergedOptions.httpLinkOptions
+			...passedHTTPLinkOptions
 		};
 
 		if(typeof httpLinkOptions.fetch !== 'function' && (typeof fetch !== 'function'))
@@ -149,7 +125,7 @@ var createGraphQLLinks = (graphQLURL, options) => {
 
 	let transportLink = null;
 	if(httpLink !== null && wsLink !== null) { // httpLink and wsLink exist
-		transportLink = split(({ query }) => {
+		transportLink = ApolloLink.split(({ query }) => {
 				const { kind, operation } = getMainDefinition(query);
 				return kind === 'OperationDefinition' && operation === 'subscription';
 			},
@@ -178,7 +154,7 @@ var createGraphQLLinks = (graphQLURL, options) => {
 		links.unshift(mergedOptions.middleware);
 
 	return {
-		link: concat(...links),
+		link: ApolloLink.from(links),
 		httpLink: httpLink,
 		wsLink: wsLink,
 		transportLink: transportLink,
@@ -187,24 +163,24 @@ var createGraphQLLinks = (graphQLURL, options) => {
 	};
 };
 
-var createGraphQLClient = (graphQLURL, passedOptions = {}) => {
-	const options = {
-		resolvers: {},
-		...passedOptions
-	};
-
+var createGraphQLClient = (graphQLURL, options = {}) => {
 	const links = createGraphQLLinks(graphQLURL, options);
 
 	const defaultApolloOptions = (typeof options.defaultApolloOptions === 'object' && options.defaultApolloOptions !== null) ? options.defaultApolloOptions : {};
 
 	const cache = (typeof options.cache === 'object' && options.cache !== null) ? options.cache : new InMemoryCache();
 
-	const client = new ApolloClientWithGQL({
+	const clientOptions = {
 		cache: cache,
 		link: links.link,
-		defaultOptions: defaultApolloOptions,
-		resolvers: options.resolvers
-	});
+		defaultOptions: defaultApolloOptions
+	};
+
+	// Apollo Client 4 takes local resolvers through LocalState rather than a resolvers option
+	if(options.resolvers)
+		clientOptions.localState = new LocalState({ resolvers: options.resolvers });
+
+	const client = new ApolloClientWithGQL(clientOptions);
 
 	return {
 		...links,

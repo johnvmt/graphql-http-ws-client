@@ -1,53 +1,30 @@
-import { ApolloClient } from "@apollo/client/core/core.cjs";
-import gql from "graphql-tag";
+import { ApolloClient, gql } from "@apollo/client";
+
+/**
+ * Wrap options[key] with gql(), if it is a string
+ * @param options
+ * @param key
+ * @returns {*}
+ */
+const parseDocumentOption = (options, key) => {
+    return (typeof options?.[key] === "string")
+        ? { ...options, [key]: gql(options[key]) }
+        : options;
+};
 
 class ApolloClientWithGQL extends ApolloClient {
-    /**
-     * Wrap query with gql(), if passed query is a string
-     * @param options
-     * @param args
-     * @returns {*|Promise<PermissionStatus>}
-     */
-    query(options, ...args) {
-        return ApolloClient.prototype.query.apply(this, [
-            {
-                ...options,
-                query: (typeof options.query === "string") ? gql(options.query) : options.query // wrap query with gql, if query is a string
-            }
-            , ...args]
-        );
-    }
+    constructor(...args) {
+        super(...args);
 
-    /**
-     * Wrap query with gql(), if passed query is a string
-     * @param options
-     * @param args
-     * @returns {*|{unsubscribe: () => void}|AsyncIterator<ExecutionResult>|Promise<AsyncIterator<ExecutionResult> | ExecutionResult>|void|(() => void)|ZenObservable.Subscription|ZenObservable.Subscription|Promise<PushSubscription>}
-     */
-    subscribe(options, ...args) {
-        return ApolloClient.prototype.subscribe.apply(this, [
-            {
-                ...options,
-                query: (typeof options.query === "string") ? gql(options.query) : options.query // wrap query with gql, if query is a string
-            }
-            , ...args]
-        );
-    }
+        // Apollo Client 4 defines some of these as instance fields, which shadow prototype methods
+        // on a subclass, so the instance's own functions are wrapped instead
+        const query = this.query;
+        const subscribe = this.subscribe;
+        const mutate = this.mutate;
 
-    /**
-     * Wrap mutation with gql(), if passed mutation is a string
-     * @param options
-     * @param args
-     * @returns {*}
-     */
-    mutate(options, ...args) {
-        return ApolloClient.prototype.mutate.apply(this, [
-            {
-                ...options,
-                mutation: (typeof options.mutation === "string") ? gql(options.mutation) : options.mutation // wrap mutation with gql, if mutation is a string
-            }
-            , ...args]
-        );
+        this.query = (options, ...rest) => query.call(this, parseDocumentOption(options, "query"), ...rest);
+        this.subscribe = (options, ...rest) => subscribe.call(this, parseDocumentOption(options, "query"), ...rest);
+        this.mutate = (options, ...rest) => mutate.call(this, parseDocumentOption(options, "mutation"), ...rest);
     }
 }
 
