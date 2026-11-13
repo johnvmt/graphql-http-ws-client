@@ -1,10 +1,9 @@
-import { getMainDefinition } from "@apollo/client/utilities/utilities.cjs";
-import { concat, split } from "@apollo/client/link/core/core.cjs";
-import { RetryLink } from "@apollo/client/link/retry/retry.cjs";
-import { HttpLink } from "@apollo/client/link/http/http.cjs";
-import { setContext } from '@apollo/client/link/context/context.cjs';
-import { WebSocketLink } from "@apollo/client/link/ws/ws.cjs";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions/subscriptions.cjs";
+import { ApolloLink, HttpLink } from "@apollo/client";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { RetryLink } from "@apollo/client/link/retry";
+import { SetContextLink } from "@apollo/client/link/context";
+import { WebSocketLink } from "@apollo/client/link/ws";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import { createClient } from "graphql-ws";
 
@@ -24,13 +23,16 @@ export default (graphQLURL, options) => {
 
 	let httpLink = null;
 	if(mergedOptions.createHTTPLink) {
-		const authLink = mergedOptions.httpLinkOptions?.setContext
-			? setContext(mergedOptions.httpLinkOptions?.setContext)
+		const { setContext: contextSetter, ...passedHTTPLinkOptions } = mergedOptions.httpLinkOptions ?? {};
+
+		// contextSetter keeps the (operation, prevContext) order callers already pass
+		const authLink = contextSetter
+			? new SetContextLink((prevContext, operation) => contextSetter(operation, prevContext))
 			: undefined;
 
 		const httpLinkOptions = {
 			uri: graphQLURL,
-			...mergedOptions.httpLinkOptions
+			...passedHTTPLinkOptions
 		};
 
 		if(typeof httpLinkOptions.fetch !== 'function' && (typeof fetch !== 'function'))
@@ -93,7 +95,7 @@ export default (graphQLURL, options) => {
 
 	let transportLink = null;
 	if(httpLink !== null && wsLink !== null) { // httpLink and wsLink exist
-		transportLink = split(({ query }) => {
+		transportLink = ApolloLink.split(({ query }) => {
 				const { kind, operation } = getMainDefinition(query);
 				return kind === 'OperationDefinition' && operation === 'subscription';
 			},
@@ -122,7 +124,7 @@ export default (graphQLURL, options) => {
 		links.unshift(mergedOptions.middleware);
 
 	return {
-		link: concat(...links),
+		link: ApolloLink.from(links),
 		httpLink: httpLink,
 		wsLink: wsLink,
 		transportLink: transportLink,
